@@ -8,12 +8,11 @@
 
 ![](http://www.southwest-heart.com/img/heart/heart_1.jpg)
 
-This python script checks your flight reservation with Southwest and then checks you in at exactly 24 hours before your flight.  Queue up the script and it will `sleep` until the earliest possible check-in time.
+This python script checks your flight reservation with Southwest and then checks you in at exactly 24 hours before your flight. Queue up the script and it will `sleep` until the earliest possible check-in time.
 
 ## Contributors
 
 [![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/0)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/0)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/1)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/1)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/2)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/2)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/3)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/3)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/4)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/4)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/5)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/5)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/6)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/6)[![](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/images/7)](https://sourcerer.io/fame/pyro2927/pyro2927/SouthwestCheckin/links/7)
-
 
 ## Requirements
 
@@ -21,12 +20,12 @@ This script can either be ran directly on your host or within Docker.
 
 ### Host
 
-* Python (should work with 2.x or 3.x thanks to @ratabora)
-* [pip](https://pypi.python.org/pypi/pip)
+- Python (should work with 2.x or 3.x thanks to @ratabora)
+- [pip](https://pypi.python.org/pypi/pip)
 
 ### Docker
 
-* Docker (tested with 1.12.6)
+- Docker (tested with 1.12.6)
 
 ## Setup
 
@@ -52,16 +51,24 @@ The reservation details are passed as a comma-separated list including the confi
 $ python ./checkin.py RESERVATION_LIST
 ```
 
+where `RESERVATION_LIST` looks like `CONFIRMATION_NUMBER_1,FIRST_NAME_1,LAST_NAME_1,...CONFIRMATION_NUMBER_N,FIRST_NAME_N,LAST_NAME_N`.
+
 ### Docker
+
+#### Build
+
+```bash
+$ docker build -t southwestcheckin:latest .
+```
 
 #### Usage (Single)
 
 ```bash
-$ sudo docker run -it pyro2927/southwestcheckin:latest CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
+$ sudo docker run -it southwestcheckin:latest CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
 ```
 
 #### Usage (Multiple)
 
 ```bash
-$ sudo docker run -it pyro2927/southwestcheckin:latest RESERVATION_LIST
+$ sudo docker run -it southwestcheckin:latest RESERVATION_LIST
 ```

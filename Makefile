@@ -9,9 +9,6 @@ lint:
 	pycodestyle */*.py --show-source --ignore=E501
 
 docker:
-	docker build -t pyro2927/southwestcheckin .
-
-release:
-	docker push pyro2927/southwestcheckin
+	docker build -t southwestcheckin .
 
 .PHONY: all
