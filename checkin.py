@@ -13,15 +13,17 @@ Options:
   --version     Show version.
 
 """
-from datetime import datetime, timedelta
-from dateutil.parser import parse
-from docopt import docopt
-from math import trunc
-from pytz import utc
-from southwest import Reservation, openflights
-from threading import Thread
 import sys
 import time
+from datetime import datetime, timedelta
+from math import trunc
+from threading import Thread
+
+from dateutil.parser import parse
+from docopt import docopt
+from pytz import utc
+
+from southwest import Reservation, openflights
 
 CHECKIN_EARLY_SECONDS = 5
 
@@ -37,7 +39,7 @@ def schedule_checkin(flight_time, reservation):
         m, s = divmod(delta, 60)
         h, m = divmod(m, 60)
         print(
-            "Too early to check in. Waiting {} hours, {} minutes, {} seconds".format(
+            "Too early to check in. Waiting {} hours, {} minutes, {} seconds\n".format(
                 trunc(h), trunc(m), trunc(s)
             )
         )
@@ -84,12 +86,13 @@ def auto_multi_checkin(reservation_details, verbose=False):
         t.daemon = True
         t.start()
         threads.append(t)
-        t.join()
+        t.join(5)
 
     handle_threads(threads)
 
 
 def auto_checkin(reservation_number, first_name, last_name, verbose=False):
+    log_attempt(first_name, last_name, reservation_number)
     r = Reservation(reservation_number, first_name, last_name, verbose)
     body = r.lookup_existing_reservation()
 
@@ -135,6 +138,16 @@ def handle_threads(threads):
                 break
 
 
+def log_attempt(first_name, last_name, reservation_number):
+    now = datetime.now()
+    time_of_attempt = now.strftime("%H:%M:%S")
+    print(
+        "Attempting to check in {} {} at {}. Confirmation: {}\n".format(
+            first_name, last_name, time_of_attempt, reservation_number
+        )
+    )
+
+
 if __name__ == "__main__":
 
     arguments = docopt(__doc__, version="Southwest Checkin 3")
@@ -145,18 +158,9 @@ if __name__ == "__main__":
     verbose = arguments["--verbose"]
 
     try:
-        now = datetime.now()
-        time_of_attempt = now.strftime("%H:%M:%S")
-
         if reservation_number:
-            print(
-                "Attempting to check in {} {} at {}. Confirmation: {}\n".format(
-                    first_name, last_name, time_of_attempt, reservation_number
-                )
-            )
             auto_checkin(reservation_number, first_name, last_name, verbose)
         else:
-            print("Attempting multi checkin at {}".format(time_of_attempt))
             auto_multi_checkin(reservation_details, verbose)
     except KeyboardInterrupt:
         print("Ctrl+C detected, canceling checkin")

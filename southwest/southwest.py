@@ -1,16 +1,19 @@
-from time import sleep
-import requests
 import json
+import logging
+import os
 import sys
-import uuid
+from time import sleep
 
-BASE_URL = 'https://mobile.southwest.com/api/'
+import requests
+
+BASE_URL = "https://mobile.southwest.com/api/"
 CHECKIN_INTERVAL_SECONDS = 0.25
 MAX_ATTEMPTS = 40
 
+logging.getLogger().setLevel(logging.DEBUG)
 
-class Reservation():
 
+class Reservation:
     def __init__(self, number, first, last, verbose=False):
         self.number = number
         self.first = first
@@ -19,17 +22,20 @@ class Reservation():
 
     @staticmethod
     def generate_headers():
-        config_js = requests.get('https://mobile.southwest.com/js/config.js')
-        if config_js.status_code == requests.codes.ok:
-            modded = config_js.text[config_js.text.index("API_KEY"):]
-            API_KEY = modded[modded.index(':') + 1:modded.index(',')].strip('"')
-        else:
-            print("Couldn't get API_KEY")
-            sys.exit(1)
+        this_dir = os.path.dirname(__file__)
+        header_file = open(
+            os.path.join(this_dir, "../../southwest-headers/southwest_headers.json")
+        )
+        # the header file is expected to exist by following the directions in https://github.com/byalextran/southwest-headers/tree/develop
+        tricky_headers = json.load(header_file)
 
-        USER_EXPERIENCE_KEY = str(uuid.uuid1()).upper()
-        # Pulled from proxying the Southwest iOS App
-        return {'Host': 'mobile.southwest.com', 'Content-Type': 'application/json', 'X-API-Key': API_KEY, 'X-User-Experience-Id': USER_EXPERIENCE_KEY, 'Accept': '*/*', 'X-Channel-ID': 'MWEB'}
+        return {
+            "Host": "mobile.southwest.com",
+            "Content-Type": "application/json",
+            "Accept": "*/*",
+            "X-Channel-ID": "MWEB",
+            **tricky_headers,
+        }
 
     # You might ask yourself, "Why the hell does this exist?"
     # Basically, there sometimes appears a "hiccup" in Southwest where things
@@ -44,10 +50,14 @@ class Reservation():
                 else:
                     r = requests.get(url, headers=headers)
                 data = r.json()
-                if 'httpStatusCode' in data and data['httpStatusCode'] in ['NOT_FOUND', 'BAD_REQUEST', 'FORBIDDEN']:
+                if "httpStatusCode" in data and data["httpStatusCode"] in [
+                    "NOT_FOUND",
+                    "BAD_REQUEST",
+                    "FORBIDDEN",
+                ]:
                     attempts += 1
                     if not self.verbose:
-                        print(data['message'])
+                        print(data["message"])
                     else:
                         print(r.headers)
                         print(json.dumps(data, indent=2))
@@ -72,19 +82,29 @@ class Reservation():
                 return v
 
     def with_suffix(self, uri):
-        return "{}{}{}?first-name={}&last-name={}".format(BASE_URL, uri, self.number, self.first, self.last)
+        return "{}{}{}?first-name={}&last-name={}".format(
+            BASE_URL, uri, self.number, self.first, self.last
+        )
 
     def lookup_existing_reservation(self):
         # Find our existing record
-        return self.load_json_page(self.with_suffix("mobile-air-booking/v1/mobile-air-booking/page/view-reservation/"))
+        return self.load_json_page(
+            self.with_suffix(
+                "mobile-air-booking/v1/mobile-air-booking/page/view-reservation/"
+            )
+        )
 
     def get_checkin_data(self):
-        return self.load_json_page(self.with_suffix("mobile-air-operations/v1/mobile-air-operations/page/check-in/"))
+        return self.load_json_page(
+            self.with_suffix(
+                "mobile-air-operations/v1/mobile-air-operations/page/check-in/"
+            )
+        )
 
     def checkin(self):
         data = self.get_checkin_data()
-        info_needed = data['_links']['checkIn']
-        url = "{}mobile-air-operations{}".format(BASE_URL, info_needed['href'])
+        info_needed = data["_links"]["checkIn"]
+        url = "{}mobile-air-operations{}".format(BASE_URL, info_needed["href"])
         print("Attempting check-in...")
-        confirmation = self.load_json_page(url, info_needed['body'])
+        confirmation = self.load_json_page(url, info_needed["body"])
         return confirmation

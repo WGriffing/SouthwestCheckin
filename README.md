@@ -34,13 +34,22 @@ This script can either be ran directly on your host or within Docker.
 #### Install Base Package Requirements
 
 ```bash
-$ pip install -r requirements.txt
+$ pip install virtualenv
+$ python -m virtualenv venv
+& source venv/bin/activate
+(venv)$ pip install -r requirements.txt
 ```
+
+### southwest-headers setup
+
+1. Clone https://github.com/WGriffing/southwest-headers in parallel with this repo, you should have 2 folders in the same parent dir: `SouthwestCheckin` and `southwest-headers`.
+1. Checkout the `develop` branch in the `southwest-headers` repo.
+1. Follow the instructions in https://github.com/WGriffing/southwest-headers/blob/develop/README.md to setup the cronjob that will populate the contents of `../southwest-headers/southwest_headers.json` that this script depends on.
 
 #### Usage (Single)
 
 ```bash
-$ python ./checkin.py CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
+(venv)$ python checkin.py CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
 ```
 
 #### Usage (Multiple)
@@ -48,10 +57,10 @@ $ python ./checkin.py CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
 The reservation details are passed as a comma-separated list including the confirmation number, first name, and last name for each reservation.
 
 ```bash
-$ python ./checkin.py RESERVATION_LIST
+(venv)$ python checkin.py RESERVATION_LIST
 ```
 
-where `RESERVATION_LIST` looks like `CONFIRMATION_NUMBER_1,FIRST_NAME_1,LAST_NAME_1,...CONFIRMATION_NUMBER_N,FIRST_NAME_N,LAST_NAME_N`.
+where `RESERVATION_LIST` looks like `CONFIRMATION_NUMBER_1,FIRST_NAME_1,LAST_NAME_1,...,CONFIRMATION_NUMBER_N,FIRST_NAME_N,LAST_NAME_N`.
 
 ### Docker
 
@@ -64,11 +73,13 @@ $ docker build -t southwestcheckin:latest .
 #### Usage (Single)
 
 ```bash
-$ sudo docker run -it southwestcheckin:latest CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
+$ docker run -it southwestcheckin:latest CONFIRMATION_NUMBER FIRST_NAME LAST_NAME
 ```
 
 #### Usage (Multiple)
 
 ```bash
-$ sudo docker run -it southwestcheckin:latest RESERVATION_LIST
+$ docker run -it southwestcheckin:latest RESERVATION_LIST
 ```
+
+where `RESERVATION_LIST` looks like `CONFIRMATION_NUMBER_1,FIRST_NAME_1,LAST_NAME_1,...,CONFIRMATION_NUMBER_N,FIRST_NAME_N,LAST_NAME_N`.
