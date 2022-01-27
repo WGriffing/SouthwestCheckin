@@ -50,6 +50,10 @@ class Reservation:
                 else:
                     r = requests.get(url, headers=headers)
                 data = r.json()
+                if self.verbose:
+                    print("----- request headers begin -----")
+                    print(json.dumps(headers, indent=2))
+                    print("----- request headers end -----")
                 if "httpStatusCode" in data and data["httpStatusCode"] in [
                     "NOT_FOUND",
                     "BAD_REQUEST",
@@ -59,15 +63,23 @@ class Reservation:
                     if not self.verbose:
                         print(data["message"])
                     else:
+                        print("----- response headers begin -----")
                         print(r.headers)
+                        print("----- response headers end -----")
+                        print("----- response data begin -----")
                         print(json.dumps(data, indent=2))
+                        print("----- response data end -----")
                     if attempts > MAX_ATTEMPTS:
                         sys.exit("Unable to get data, killing self")
                     sleep(CHECKIN_INTERVAL_SECONDS)
                     continue
                 if self.verbose:
+                    print("----- response headers begin -----")
                     print(r.headers)
+                    print("----- response headers end -----")
+                    print("----- response data begin -----")
                     print(json.dumps(data, indent=2))
+                    print("----- response data end -----")
                 return data
         except ValueError:
             # Ignore responses with no json data in body
